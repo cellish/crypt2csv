@@ -145,7 +145,7 @@ print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY')
 print("===実現損益(合計)============")
 print("合計: {:,.0f} JPY ".format(df["実現損益"].sum()))
 
-df2=get_profit_each(df)
+df2=get_each_profit(df)
 print("===残金====================")
 print(df2.groupby("取引所")[["売買価格"]].sum())
 
