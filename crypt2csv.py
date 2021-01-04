@@ -95,7 +95,7 @@ def get_profit(df):
     df = df.reindex(columns=columns).reset_index()
     return(df)
 
-def get_profit_each(df):
+def get_each_profit(df):
     df_group = df.sort_values(by=["取引所", "銘柄", "日時"]).groupby(["取引所","銘柄"])
     df2=df_group[["売買価格","約定数","実現損益"]].sum()
 
@@ -141,6 +141,7 @@ df.to_csv("crypt-history.csv")
 #pd.options.display.float_format = '{:,.0f}'.format
 print("===実現損益=================")
 print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY') )
+
 print("===実現損益(合計)============")
 print("合計: {:,.0f} JPY ".format(df["実現損益"].sum()))
 
