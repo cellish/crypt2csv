@@ -7,7 +7,8 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","BTC","LTC","XEM"]
+# Note: JPY shows the cash!
+crypts = ["BTC","ETH","BTC","LTC","XEM","JPY"]
 
 def GMO_data(df):
     GMO_label={
@@ -80,7 +81,7 @@ def running_mean(curr, prev):
 
     return ret
 
-def get_profit(df, rows= ["BTC","ETH","BTC","LTC","XEM"]):
+def get_profit(df):
     ##### for all #####
     df["単価"] = -df["売買価格"] / df["約定数"]
     df["買付価格"] = -df[df["売買価格"] < 0]["売買価格"]
@@ -96,17 +97,16 @@ def get_profit(df, rows= ["BTC","ETH","BTC","LTC","XEM"]):
     ##### formatting data
     columns = ["銘柄", "取引所", "ID", "日時", "売買", "売買価格", "単価", "約定数", "保有数", "買付価格", "売却価格", "平均単価", "実現損益"]
     df = df.reindex(columns=columns).reset_index()
-    df = df.reindex(rows=rows).reset_index()
 
     return(df)
 
-def get_summary(df, rows= ["BTC","ETH","BTC","LTC","XEM"]):
+def get_summary(df, rows=["BTC","ETH","BTC","LTC","XEM"]):
     df_group = df.sort_values(by=["銘柄", "日時"]).groupby(["銘柄"])
     df2=df_group[["約定数"]].sum()
 
     df2["平均単価"]=df_group.last()["平均単価"]
     df2["購入額"]=df2["約定数"]*df2["平均単価"]
-    df2 = df2.reindex(rows=rows).reset_index()
+    df2 = df2.reindex(index=rows)
 
     return df2
 
@@ -148,8 +148,7 @@ for f in dir.glob("*.csv"):
 
     df=df.append(newdf, ignore_index=True)
 
-df=get_profit(df, rows=crypts)
-#display(df.head())
+df=get_profit(df)
 df.to_csv("crypt-history.csv")
 
 # print some results
