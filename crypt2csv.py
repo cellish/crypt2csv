@@ -6,6 +6,9 @@ from IPython.display import display
 import pytz
 from pathlib import Path
 
+# add/change the crypto names in the order you like to list up
+crypts = ["BTC","ETH","BTC","LTC","XEM"]
+
 def GMO_data(df):
     GMO_label={
     #'日時':'',
@@ -77,7 +80,7 @@ def running_mean(curr, prev):
 
     return ret
 
-def get_profit(df):
+def get_profit(df, rows= ["BTC","ETH","BTC","LTC","XEM"]):
     ##### for all #####
     df["単価"] = -df["売買価格"] / df["約定数"]
     df["買付価格"] = -df[df["売買価格"] < 0]["売買価格"]
@@ -93,9 +96,21 @@ def get_profit(df):
     ##### formatting data
     columns = ["銘柄", "取引所", "ID", "日時", "売買", "売買価格", "単価", "約定数", "保有数", "買付価格", "売却価格", "平均単価", "実現損益"]
     df = df.reindex(columns=columns).reset_index()
+    df = df.reindex(rows=rows).reset_index()
+
     return(df)
 
-def get_each_profit(df):
+def get_summary(df, rows= ["BTC","ETH","BTC","LTC","XEM"]):
+    df_group = df.sort_values(by=["銘柄", "日時"]).groupby(["銘柄"])
+    df2=df_group[["約定数"]].sum()
+
+    df2["平均単価"]=df_group.last()["平均単価"]
+    df2["購入額"]=df2["約定数"]*df2["平均単価"]
+    df2 = df2.reindex(rows=rows).reset_index()
+
+    return df2
+
+def get_each_shop(df):
     df_group = df.sort_values(by=["取引所", "銘柄", "日時"]).groupby(["取引所","銘柄"])
     df2=df_group[["売買価格","約定数","実現損益"]].sum()
 
@@ -133,22 +148,28 @@ for f in dir.glob("*.csv"):
 
     df=df.append(newdf, ignore_index=True)
 
-df=get_profit(df)
+df=get_profit(df, rows=crypts)
 #display(df.head())
 df.to_csv("crypt-history.csv")
 
 # print some results
 #pd.options.display.float_format = '{:,.0f}'.format
 print("===実現損益=================")
-print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY') )
+print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY'))
 
 print("===実現損益(合計)============")
 print("合計: {:,.0f} JPY ".format(df["実現損益"].sum()))
 
-df2=get_each_profit(df)
+print("===summary============")
+df_summary=get_summary(df, rows=crypts)
+display(df_summary.head())
+df_summary.to_csv("crypt-summary.csv")
+
+
+df2=get_each_shop(df)
 print("===残金====================")
 print(df2.groupby("取引所")[["売買価格"]].sum())
 
-df2.to_csv("crypt-summary.csv")
+df2.to_csv("crypt-shop-summary.csv")
 
 
