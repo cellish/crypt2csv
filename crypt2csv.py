@@ -7,8 +7,7 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-# Note: JPY shows the cash!
-crypts = ["BTC","ETH","BTC","LTC","XEM","JPY"]
+crypts = ["BTC","ETH","LTC","BTC","XEM"]
 
 def GMO_data(df):
     GMO_label={
@@ -154,13 +153,14 @@ df.to_csv("crypt-history.csv")
 # print some results
 #pd.options.display.float_format = '{:,.0f}'.format
 print("===実現損益=================")
-print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY'))
+print(df.groupby("銘柄")[["実現損益","約定数"]].sum().drop(index='JPY').reindex(index=crypts))
 
 print("===実現損益(合計)============")
 print("合計: {:,.0f} JPY ".format(df["実現損益"].sum()))
 
 print("===summary============")
-df_summary=get_summary(df, rows=crypts)
+df_summary=get_summary(df, rows=crypts).reindex(index=crypts)
+
 display(df_summary.head())
 df_summary.to_csv("crypt-summary.csv")
 
