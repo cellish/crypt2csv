@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import sys
 import pandas as pd
@@ -7,7 +8,7 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","LTC","BTC","XEM"]
+crypts = ["BTC","ETH","LTC","BCH","XEM","XTZ"]
 
 def GMO_data(df):
     GMO_label={
