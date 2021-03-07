@@ -17,6 +17,7 @@ def GMO_data(df):
     '銘柄名':'銘柄',
     '売買区分':'売買',
     '約定数量':'約定数',
+#    '注文手数料':'手数料', # 売買価格に含まれている
     '日本円受渡金額':'売買価格',
     '約定レート':'レート',
     '授受区分':'授受区分',
@@ -29,12 +30,16 @@ def GMO_data(df):
         .dt.tz_localize(pytz.timezone('ASIA/Tokyo'))
 
     df.rename(columns=GMO_label, inplace=True)
-    df.drop(columns=['約定ID','建玉ID','精算区分','取引区分','執行条件','注文タイプ','約定金額','注文手数料','レバレッジ手数料','入出金区分','入出金金額'], 
+    df.drop(columns=['約定ID','建玉ID','精算区分','取引区分','執行条件','注文タイプ','約定金額','レバレッジ手数料','入出金区分','入出金金額'], 
         errors='ignore', inplace=True)
     df["売買"] = df["売買"].str.replace("売", "Sell")
     df["売買"] = df["売買"].str.replace("買", "Buy")
-    df['約定数'] = df['約定数'].where(df['売買価格'] < 0, -df['約定数'])
+    df["授受区分"] = df["授受区分"].astype(object)
+    df["授受区分"] = df["授受区分"].str.replace("預入", "Receive")
 
+    df["売買"] = df['売買'].where(df['授受区分'] != "Receive", df['授受区分'])
+    df['約定数'] = df['約定数'].where(df['売買価格'] < 0, -df['約定数'])
+    df['約定数'] = df['約定数'].where(df['授受区分'] != 'Receive', df['数量'])    
 
 def CC_data(df):
     CC_label={
@@ -43,7 +48,8 @@ def CC_data(df):
     'trading_currency':'銘柄',
     'operation':'売買',
     'amount':'約定数',
-    'price':'売買価格'
+    'price':'売買価格',
+#    'fee':'手数料'
     }
 
     df["取引所"]="CoinCheck"
@@ -53,9 +59,10 @@ def CC_data(df):
     df.rename(columns=CC_label, inplace=True)
     df['売買価格'] = df['売買価格'].where(df['銘柄'] != 'JPY', df["約定数"])
     df['約定数'] = df['約定数'].mask(df['銘柄'] == 'JPY')
+    df['送金手数料'] = df['fee'].where(df['売買'] == 'Sent', 0) 
     display(df.head())
 
-    df.drop(columns=['original_currency','fee','comment'], 
+    df.drop(columns=['original_currency','comment'], 
         errors='ignore', inplace=True)
 
 # https://stackoverflow.com/questions/16698415/reference-previous-row-when-iterating-through-dataframe/38155257#38155257
@@ -76,7 +83,7 @@ def apply_func_decorator(func):
 
 @apply_func_decorator
 def running_mean(curr, prev):
-    if curr["売買"] == "Sell":
+    if curr["売買"] != "Buy":
         ret = prev.get("平均単価", 0.0)
     else:
         ret = (prev.get("平均単価", 0) * prev.get("保有数", 0) - curr["売買価格"]) / curr["保有数"]
@@ -97,7 +104,7 @@ def get_profit(df):
     df["実現損益"] = df["売却価格"]+df["平均単価"]*df["約定数"]
 
     ##### formatting data
-    columns = ["銘柄", "取引所", "ID", "日時", "売買", "売買価格", "単価", "約定数", "保有数", "買付価格", "売却価格", "平均単価", "実現損益"]
+    columns = ["銘柄", "取引所", "ID", "日時", "売買", "売買価格", "単価", "約定数", "保有数", "買付価格", "売却価格", "平均単価", "実現損益", "授受区分", "数量", "送金手数料"]
     df = df.reindex(columns=columns).reset_index()
 
     return(df)
