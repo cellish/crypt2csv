@@ -8,7 +8,7 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","XRP","LTC","BCH","XLM","XTZ","XEM","XYM"]
+crypts = ["BTC","ETH","XRP","LTC","BCH","XLM","LINK","XTZ","XEM","XYM"]
 
 def GMO_data(df):
     GMO_label={
@@ -116,7 +116,7 @@ def get_profit(df):
 
     return(df)
 
-def get_summary(df, rows=["BTC","ETH","XRP","LTC","BCH","XLM","XTZ","XEM","XYM"]):
+def get_summary(df, rows=["BTC","ETH","XRP","LTC","BCH","XLM","LINK","XTZ","XEM","XYM"]):
     df_group = df.sort_values(by=["銘柄", "日時"]).groupby(["銘柄"])
     df2=df_group[["約定数"]].sum()
 
