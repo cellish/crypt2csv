@@ -8,7 +8,7 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","LTC","BCH","XEM","XTZ","XLM"]
+crypts = ["BTC","ETH","XRP","LTC","BCH","XLM","XTZ","XEM","XYM"]
 
 def GMO_data(df):
     GMO_label={
@@ -30,8 +30,14 @@ def GMO_data(df):
         .dt.tz_localize(pytz.timezone('ASIA/Tokyo'))
 
     df.rename(columns=GMO_label, inplace=True)
+
+    df['銘柄'] = df['銘柄'].where(df['精算区分'] != '取引所現物 取引手数料返金', df['銘柄']+'手数料')
+    #df['銘柄'] = df['銘柄'].where(df['精算区分'] != '取引所現物 取引手数料返金','手数料')
+
+
     df.drop(columns=['約定ID','建玉ID','精算区分','取引区分','執行条件','注文タイプ','約定金額','レバレッジ手数料','入出金区分','入出金金額'], 
         errors='ignore', inplace=True)
+
     df["売買"] = df["売買"].str.replace("売", "Sell")
     df["売買"] = df["売買"].str.replace("買", "Buy")
     df["授受区分"] = df["授受区分"].astype(object)
@@ -39,7 +45,8 @@ def GMO_data(df):
 
     df["売買"] = df['売買'].where(df['授受区分'] != "Receive", df['授受区分'])
     df['約定数'] = df['約定数'].where(df['売買価格'] < 0, -df['約定数'])
-    df['約定数'] = df['約定数'].where(df['授受区分'] != 'Receive', df['数量'])    
+    df['約定数'] = df['約定数'].where(df['授受区分'] != 'Receive', df['数量'])
+    
 
 def CC_data(df):
     CC_label={
@@ -109,7 +116,7 @@ def get_profit(df):
 
     return(df)
 
-def get_summary(df, rows=["BTC","ETH","LTC","BCH","XEM","XTZ","XLM"]):
+def get_summary(df, rows=["BTC","ETH","XRP","LTC","BCH","XLM","XTZ","XEM","XYM"]):
     df_group = df.sort_values(by=["銘柄", "日時"]).groupby(["銘柄"])
     df2=df_group[["約定数"]].sum()
 
@@ -144,6 +151,8 @@ if (sys.argv[-1]==sys.argv[0]):
     print('Usage: {} <dir name>'.format(sys.argv[0]))
 
 dir = Path(sys.argv[-1])
+#dir = "Crypt-loglog"
+
 
 df = pd.DataFrame()
 #df = (pd.read_csv(f) for f in dir.glob("*.csv"))
