@@ -8,7 +8,8 @@ import pytz
 from pathlib import Path
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","XRP","LTC","BCH","XLM","LINK","XTZ","XEM","XYM"]
+crypts = ["BTC","ETH","XRP","DOGE","ADA","SOL","LTC","LINK","XLM","BCH","XTZ","XEM","OMG"]#,"XYM"]
+
 
 def GMO_data(df):
     GMO_label={
@@ -31,6 +32,11 @@ def GMO_data(df):
 
     df.rename(columns=GMO_label, inplace=True)
 
+#    df=df[df['銘柄'] != '暗号資産FX取引']
+    #df=df[df['銘柄'] != '暗号資産FXレバレッジ手数料']
+
+    print("tail")
+    display(df.tail())
     df['銘柄'] = df['銘柄'].where(df['精算区分'] != '取引所現物 取引手数料返金', df['銘柄']+'手数料')
     #df['銘柄'] = df['銘柄'].where(df['精算区分'] != '取引所現物 取引手数料返金','手数料')
 
@@ -116,7 +122,9 @@ def get_profit(df):
 
     return(df)
 
-def get_summary(df, rows=["BTC","ETH","XRP","LTC","BCH","XLM","LINK","XTZ","XEM","XYM"]):
+
+#def get_summary(df, rows=["BTC","ETH","XRP","LTC","BCH","XLM","LINK","XTZ","XEM","XYM"]):
+def get_summary(df, rows=crypts):
     df_group = df.sort_values(by=["銘柄", "日時"]).groupby(["銘柄"])
     df2=df_group[["約定数"]].sum()
 
@@ -150,8 +158,8 @@ pd.set_option('display.max_columns', 50)
 if (sys.argv[-1]==sys.argv[0]):
     print('Usage: {} <dir name>'.format(sys.argv[0]))
 
-dir = Path(sys.argv[-1])
-#dir = "Crypt-loglog"
+#dir = Path(sys.argv[-1])
+dir = "Crypt-log"
 
 
 df = pd.DataFrame()
@@ -164,7 +172,9 @@ for f in dir.glob("*.csv"):
     else:
         CC_data(newdf)
 
-    df=df.append(newdf, ignore_index=True)
+    #df=df.append(newdf, ignore_index=True)
+    df=pd.concat([df, newdf], ignore_index=True)
+
 
 df=get_profit(df)
 df.to_csv("crypt-history.csv")
