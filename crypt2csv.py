@@ -6,9 +6,10 @@ import pandas as pd
 from IPython.display import display
 import pytz
 from pathlib import Path
+import glob
 
 # add/change the crypto names in the order you like to list up
-crypts = ["BTC","ETH","XRP","DOGE","ADA","SOL","LTC","LINK","XLM","BCH","XTZ","XEM","OMG"]#,"XYM"]
+crypts = ["BTC","ETH","XRP","SOL","ADA","DOGE","LINK","LTC","BCH","XLM","XTZ","XEM","OMG"]#,"XYM"]
 
 
 def GMO_data(df):
@@ -143,9 +144,10 @@ def get_each_shop(df):
     df2["購入額"]=df2["約定数"]*df2["平均単価"]
     return df2
 
+
 ####### main routing #######
 pd.set_option('display.max_columns', 50)
-
+dst="outputs/"
 
 # if (sys.argv[-1]==sys.argv[0]):
 #     print('Usage: {} <file name>'.format(sys.argv[0]))
@@ -156,15 +158,14 @@ pd.set_option('display.max_columns', 50)
 #     print('Error: File not found.')
 
 if (sys.argv[-1]==sys.argv[0]):
-    print('Usage: {} <dir name>'.format(sys.argv[0]))
-
-#dir = Path(sys.argv[-1])
-dir = "Crypt-log"
-
+    path = "Crypt-log/"
+    #print('Usage: {} <dir name>'.format(sys.argv[0]))
+else:
+    path = sys.argv[-1] 
 
 df = pd.DataFrame()
 #df = (pd.read_csv(f) for f in dir.glob("*.csv"))
-for f in dir.glob("*.csv"):
+for f in glob.glob(path+"*.csv"):
     newdf=pd.read_csv(f)
 
     if '注文ID' in newdf.columns:
@@ -177,7 +178,7 @@ for f in dir.glob("*.csv"):
 
 
 df=get_profit(df)
-df.to_csv("crypt-history.csv")
+df.to_csv(dst+"crypt-history.csv")
 
 # print some results
 #pd.options.display.float_format = '{:,.0f}'.format
@@ -191,13 +192,13 @@ print("===summary============")
 df_summary=get_summary(df, rows=crypts).reindex(index=crypts)
 
 display(df_summary.head())
-df_summary.to_csv("crypt-summary.csv")
+df_summary.to_csv(dst+"crypt-summary.csv")
 
 
 df2=get_each_shop(df)
 print("===残金====================")
 print(df2.groupby("取引所")[["売買価格"]].sum())
 
-df2.to_csv("crypt-shop-summary.csv")
+df2.to_csv(dst+"crypt-shop-summary.csv")
 
 

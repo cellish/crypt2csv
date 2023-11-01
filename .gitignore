@@ -1,2 +1,5 @@
 Crypt-log/
+outputs/
+poetry.lock
 *~
+

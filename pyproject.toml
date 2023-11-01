@@ -8,6 +8,9 @@ authors = ["Jun Nishii <jun@tutti.jp>"]
 python = "^3.10"
 pandas = "^1.5.2"
 numpy = "^1.24.1"
+ipython = "^8.7.0"
+pathlib = "^1.0.1"
+pytz = "^2022.7"
 
 [tool.poetry.dev-dependencies]
 
