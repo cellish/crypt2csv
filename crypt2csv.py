@@ -28,7 +28,8 @@ def GMO_data(df):
     # 授受区分    数量  送付手数料   送付先/送付元 トランザクションID
     df["取引所"]="GMO"
 #    df["日時"]=pd.to_datetime(df['time'], format='%Y/%m/%d %H:%M', utc=False)
-    df["日時"]=pd.to_datetime(df['日時'], format='%Y/%m/%d %H:%M:%S')\
+#    df["日時"]=pd.to_datetime(df['日時'], format='%Y/%m/%d %H:%M:%S')\
+    df["日時"]=pd.to_datetime(df['日時'], format='%Y/%m/%d %H:%M')\
         .dt.tz_localize(pytz.timezone('ASIA/Tokyo'))
 
     df.rename(columns=GMO_label, inplace=True)
@@ -65,7 +66,8 @@ def CC_data(df):
     'price':'売買価格',
 #    'fee':'手数料'
     }
-
+    print("^^^^")
+    display(df)
     df["取引所"]="CoinCheck"
     df["日時"]=pd.to_datetime(df['time'],utc=True)\
         .dt.tz_convert(pytz.timezone('ASIA/Tokyo'))
@@ -74,7 +76,7 @@ def CC_data(df):
     df['売買価格'] = df['売買価格'].where(df['銘柄'] != 'JPY', df["約定数"])
     df['約定数'] = df['約定数'].mask(df['銘柄'] == 'JPY')
     df['送金手数料'] = df['fee'].where(df['売買'] == 'Sent', 0) 
-    display(df.head())
+    display(df[:5])
 
     df.drop(columns=['original_currency','comment'], 
         errors='ignore', inplace=True)
